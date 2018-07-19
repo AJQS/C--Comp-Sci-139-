@@ -1,0 +1,527 @@
+// MidtermProgram.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <cstdlib>
+#include <iostream>
+#include <iomanip>	//for setprecision notation
+#include <fstream>	//for I/O files
+#include <string>	//for string
+#include <ctime>	//for random numbers
+#include <sstream>	//for string to int conversion
+
+using namespace std;
+
+//FUNCTION PROTOTYPES
+void credits();
+void validateUserName(string &);
+void createFile(fstream &outputFile, string &filename, fstream &inputFile, int &totalcorrect, int &totalwrong, double &totalmoney);
+void retrieveStats(fstream &inputFile, int &totalcorrect, int &totalwrong, double &totalmoney);
+void menu();
+void validateMenu(fstream &outputFile, string &userAnswer, string username, int &totalcorrect, int &totalwrong, double &totalmoney, const double correctreward, const double wrongpenalty);
+void generateAddition(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty);
+void generateSubtraction(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty);
+void generateMultiplication(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty);
+void generateDivision(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty);
+void checkUserAnswer(int intAnswer, int correct);
+void validateUserAnswer(string &);
+void updateStats(int intAnswer, int correct, double &totalmoney, int &totalcorrect, int &totalwrong, const double correctreward, const double wrongpenalty);
+void displayStats(fstream &outputFile, string username, double totalmoney, int totalwrong, int totalcorrect, string userAnswer, const double correctreward, const double wrongpenalty);
+void saveStats(fstream &outputFile, string username, int totalcorrect, int totalwrong, double totalmoney);
+
+
+int main()
+{
+	//variable initialization
+	string username;
+	string userAnswer;
+	double totalmoney = 0.00;
+	const double correctreward = .05;
+	const double wrongpenalty = .03;
+	int totalcorrect = 0;
+	int totalwrong = 0;
+	fstream outputFile;
+	fstream inputFile;
+
+	//Set up fixed point notation display
+	cout << fixed << showpoint << setprecision(2);
+
+	//call the function that displays the credits/splash screen
+	credits();
+
+	//get the user's name
+	getline(cin, username);
+
+	//cal the function that validates the user's name
+	validateUserName(username);
+
+	//append .txt to the end of the user's name so a proper
+	//text file will be created
+	string filename = (username + ".txt");
+
+	//call the function that creates a text file named after
+	//the user
+	createFile(outputFile, filename, inputFile, totalcorrect, totalwrong, totalmoney);
+
+	//call the function that displays the menu
+	menu();
+
+	//call the function that validates the user's menu selection
+	validateMenu(outputFile, userAnswer, username, totalcorrect, totalwrong, totalmoney, correctreward, wrongpenalty);
+
+
+	system("PAUSE");
+	return 0;
+}
+
+void credits()
+//THIS FUNCTION DISPLAYS A SPLASH SCREEN WITH THE PROGRAM
+//NAME AND MY NAME FOR CREDIT
+{
+	string continu;
+	cout << "*********************************************" << endl;
+	cout << "*********     THE MATH GAME     *************" << endl;
+	cout << "*********    by Austin Smuda    *************" << endl;
+	cout << "*********************************************" << endl;
+	cout << "y/Y to continue, any other char to exit" << endl;
+
+	//get the user's input if they wish to continue or not
+	getline(cin, continu);
+	if (continu == "Y" || continu == "y")
+	{
+		//clear the screen and ask for name
+		system("CLS");
+		cout << "Please enter your name and press <ENTER>" << endl;
+	}
+	else
+	{
+		//close the program
+		exit(0);
+	}
+}
+void validateUserName(string &username)
+//VALIDATE THE USER INPUT A PROPER NAME THAT ONLY CONTAINS LETTERS
+//OTHERWISE DISPLAY AN ERROR MESSAGE AND ASK THE USER TO TRY AGAIN
+//THIS HAPPENS BY PARSING THE STRING AND LOOKING FOR THE FIRST CHARACTER
+//THAT IS NOT A LETTER AND ALSO MAKING SURE THE USER INPUT SOMETHING
+//DISPLAY AN ERROR MESSAGE IF THE CRITERIA IS NOT MET AND ASK FOR
+//NEW INPUT. USERNAME IS PASSED BY VALUE
+{
+	while (username.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") != -1 || username == "")
+	{
+		//clear the buffer and get username
+		cin.clear();
+		getline(cin, username);
+		//error message to display if invalid entry is made
+		cout << "Enter a name with no numbers, spaces, or special characters" << endl;
+	}
+	//clear the screen
+	system("CLS");
+}
+void createFile(fstream &outputFile, string &filename, fstream &inputFile, int &totalcorrect, int &totalwrong, double &totalmoney)
+//CREATE A TEXT FILE THAT IS NAMED AFTER THE USER
+//IF ONE DOES NOT EXIST ALREADY, OTHERWISE,
+//OPEN IT IN APPEND MODE.
+//DISPLAY AN ERROR MESSAGE OTHERWISE.
+//BOTH PARAMETERS ARE PASSED BY REFERENCE HERE.
+{
+	//create the text file or reopen if it already exists
+	//in append mode
+	outputFile.open(filename, ios::out | ios::app);
+	if (outputFile.is_open())
+	{
+		//if it exists, load old stats
+		retrieveStats(inputFile, totalcorrect, totalwrong, totalmoney);
+
+	}
+	//error message to display if failure
+	else cout << "Unable to open file" << endl;
+}
+void retrieveStats(fstream &inputFile, int &totalcorrect, int &totalwrong, double &totalmoney)
+//THIS FUNCTION READS STATS FROM AN EXISTING TEXT FILE AND LOADS
+//THEM INTO THE APPROPRIATE VARIABLES
+{
+	string username;
+	//this loop reads until the end of file is reached
+	while (!inputFile.eof())
+	{
+		inputFile >> username;
+		inputFile >> totalcorrect;
+		inputFile >> totalwrong;
+		inputFile >> totalmoney;
+	}
+}
+void menu()
+//THIS FUNCTION DISPLAYS THE MENU OF OPTIONS TO CHOOSE FROM
+{
+	cout << "******CHOOSE A PROBLEM******" << endl;
+	cout << "****************************" << endl;
+	cout << "******                ******" << endl;
+	cout << "****** 1. ADD         ******" << endl;
+	cout << "****** 2. SUBTRACT    ******" << endl;
+	cout << "****** 3. MULTIPLY    ******" << endl;
+	cout << "****** 4. DIVIDE      ******" << endl;
+	cout << "****** 5. STATS       ******" << endl;
+	cout << "****** n/N to QUIT    ******" << endl;
+	cout << "******                ******" << endl;
+	cout << "****************************" << endl;
+}
+void validateMenu(fstream &outputFile, string &userAnswer, string username, int &totalcorrect, int &totalwrong, double &totalmoney, const double correctreward, const double wrongpenalty)
+//THIS FUNCTION VALIDATES THE USERS ENTRY ON THE MENU
+//AND THEN CALLS THE APPROPRIATE FUNCTION OR DISPLAYS
+//AN ERROR IF BAD INPUT WAS GIVEN
+{
+	//initialization of menu choices
+	string ADD = "1";
+	string SUB = "2";
+	string MULT = "3";
+	string DIV = "4";
+	string STAT = "5";
+	string quit = "n";
+	string QUIT = "N";
+	string choice;
+
+	//get input
+	cin >> choice;
+	while (choice != ADD && choice != SUB && choice != MULT && choice != DIV && choice != STAT && choice != quit && choice != QUIT)
+	{
+		//error message to display if bad input received
+		cout << "invalid entry, try again" << endl;
+		//clear the buffer and try again
+		cin.clear();
+		cin >> choice;
+	}
+	if (choice == ADD)
+		//calls the addition function if selected
+	{
+		system("CLS");
+		generateAddition(outputFile, userAnswer, totalcorrect, totalwrong, username, totalmoney, correctreward, wrongpenalty);
+	}
+	else if (choice == SUB)
+		//called the subtraction function if selected
+	{
+		system("CLS");
+		generateSubtraction(outputFile, userAnswer, totalcorrect, totalwrong, username, totalmoney, correctreward, wrongpenalty);
+	}
+	else if (choice == MULT)
+		//calls the multiplication function if selected
+	{
+		system("CLS");
+		generateMultiplication(outputFile, userAnswer, totalcorrect, totalwrong, username, totalmoney, correctreward, wrongpenalty);
+	}
+	else if (choice == DIV)
+		//calls the division function if selected
+	{
+		system("CLS");
+		generateDivision(outputFile, userAnswer, totalcorrect, totalwrong, username, totalmoney, correctreward, wrongpenalty);
+	}
+	else if (choice == STAT)
+		//calls the stats page if selected
+	{
+		system("CLS");
+		displayStats(outputFile, username, totalmoney, totalwrong, totalcorrect, userAnswer, correctreward, wrongpenalty);
+	}
+	else if (choice == quit || choice == QUIT)
+		//calls the function to save stats and then quits
+		//the program if selected
+	{
+		saveStats(outputFile, username, totalcorrect, totalwrong, totalmoney);
+		system("PAUSE");
+		exit(0);
+	}
+}
+void validateUserAnswer(string &userAnswer)
+//THIS FUNCTION IS USED TO VALIDATE THAT THE USER
+//INPUT ONLY A VALID INTEGER FOR AN ANSWER
+{
+	//clear the buffer and get input
+	cin.clear();
+	getline(cin, userAnswer);
+
+	//Validate the user's answer
+	while (userAnswer.find_first_not_of("0123456789") != -1 || userAnswer == "")
+	{
+		cin.clear();
+		getline(cin, userAnswer);
+		//error to display if bad input
+		cout << "You did not enter a valid integer, try again" << endl;
+	}
+	//clear the screen
+	system("CLS");
+}
+void generateAddition(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty)
+//THIS FUNCTION GENERATES RANDOM ADDITION PROBLEMS
+//USING NUMBERS 1-10
+{
+	//variable initialization
+	int rand1, rand2;
+	int correct;
+	int intAnswer;
+
+	//Seeds the random number based on the system time, so it is random
+	srand(time(0));
+
+	//Produce random numbers between 1 & 10
+	rand1 = rand() % 10 + 1;
+	rand2 = rand() % 10 + 1;
+
+	//Correct answer
+	correct = rand1 + rand2;
+
+	//Display the problem
+	cout << "******ADDITION******" << endl;
+	cout << "*** " << rand1 << " + " << rand2 << " = ?" << " ***" << endl;
+	cout << "********************" << endl;
+
+	cin.clear();
+	getline(cin, userAnswer);
+
+	//Validate the user's answer
+	validateUserAnswer(userAnswer);
+
+	//Convert string to int
+	stringstream geek(userAnswer);
+	geek >> intAnswer;
+
+	//Check if the answer is right or wrong
+	checkUserAnswer(intAnswer, correct);
+
+	//Add a tally to the right or wrong count
+	updateStats(intAnswer, correct, totalmoney, totalcorrect, totalwrong, correctreward, wrongpenalty);
+
+	//cal the menu function
+	menu();
+
+	//validate the menu choice
+	validateMenu(outputFile, userAnswer, username, totalcorrect, totalwrong, totalmoney, correctreward, wrongpenalty);
+}
+void generateSubtraction(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty)
+//THIS FUNCTION GENERATES RANDOM SUBTRACTION PROBLEMS USING NUMBERS 1 - 10.
+//IT MAKES SURE THE SMALLER NUMBER IS ALWAYS SUBTRACTED FROM THE LARGER
+{
+	//variable initialization
+	int rand1, rand2;
+	int correct;
+	int intAnswer = 0;
+
+	//Seeds the random number based on the system time, so it is random
+	srand(time(0));
+
+	//Produce random numbers
+	rand1 = rand() % 10 + 1;
+	rand2 = rand() % 10 + 1;
+
+	//Display the problem if rand1 > rand2
+	if (rand1 >= rand2)
+	{
+		cout << "******SUBTRACTION******" << endl;
+		cout << "*** " << rand1 << " - " << rand2 << " = ?" << " ***" << endl;
+		cout << "********************" << endl;
+
+		//Define the correct answer
+		correct = rand1 - rand2;
+	}
+
+	//Display the problem if rand2 > rand1
+	else if (rand2 >= rand1)
+	{
+		cout << "******SUBTRACTION******" << endl;
+		cout << "*** " << rand2 << " - " << rand1 << " = ?" << " ***" << endl;
+		cout << "********************" << endl;
+
+		//Define the correct answer
+		correct = rand2 - rand1;
+	}
+
+	//Get the user's answer
+	getline(cin, userAnswer);
+
+	//Validate the user's answer
+	validateUserAnswer(userAnswer);
+
+	//Convert string to int
+	stringstream geek(userAnswer);
+	geek >> intAnswer;
+
+	//Check if the answer is right or wrong
+	checkUserAnswer(intAnswer, correct);
+
+	//Add a tally to the right or wrong count
+	updateStats(intAnswer, correct, totalmoney, totalcorrect, totalwrong, correctreward, wrongpenalty);
+
+	//call the menu function
+	menu();
+
+	//validate the menu choice
+	validateMenu(outputFile, userAnswer, username, totalcorrect, totalwrong, totalmoney, correctreward, wrongpenalty);
+}
+void generateMultiplication(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty)
+//THIS FUNCTION GENERATES RANDOM MULTIPLICATION PROBLEMS USING NUMBERS 1 - 10.
+{
+	//variable initialization
+	int rand1, rand2;
+	int correct;
+	int intAnswer = 0;
+
+	//Seeds the random number based on the system time, so it is random
+	srand(time(0));
+
+	//Produce random numbers
+	rand1 = rand() % 10 + 1;
+	rand2 = rand() % 10 + 1;
+
+	//Correct answer
+	correct = rand1 * rand2;
+
+	//Display the problem
+	cout << "******Multiplication******" << endl;
+	cout << "*** " << rand1 << " * " << rand2 << " = ?" << " ***" << endl;
+	cout << "********************" << endl;
+
+	//Get the user's answer
+	getline(cin, userAnswer);
+
+	//Validate the user's answer
+	validateUserAnswer(userAnswer);
+
+	//Convert string to int
+	stringstream geek(userAnswer);
+	geek >> intAnswer;
+
+	//Check if the answer is right or wrong
+	checkUserAnswer(intAnswer, correct);
+
+	//Add a tally to the right or wrong count
+	updateStats(intAnswer, correct, totalmoney, totalcorrect, totalwrong, correctreward, wrongpenalty);
+
+	//call the menu function
+	menu();
+
+	//validate the menu choice
+	validateMenu(outputFile, userAnswer, username, totalcorrect, totalwrong, totalmoney, correctreward, wrongpenalty);
+}
+void generateDivision(fstream &outputFile, string &userAnswer, int &totalcorrect, int &totalwrong, string username, double &totalmoney, const double correctreward, const double wrongpenalty)
+///THIS FUNCTION GENERATES RANDOM DIVISION PROBLEMS. IT ENSURES ONLY
+//NUMBERS THAT ARE COMPLETELY DIVISIBLE ARE USED AND ALWAYS HAS THE 
+//LARGER DIVIDED BY THE SMALLER
+{
+	//variable initialization
+	int rand1, rand2;
+	int correct;
+	int intAnswer = 0;
+	int dividend, divisor;
+
+	//Seeds the random number based on the system time, so it is random
+	srand(time(0));
+
+	//Produce random numbers
+	rand1 = rand() % 9 + 1;
+	rand2 = rand() % 9 + 1;
+
+	//Multiply the 2 random numbers together, ensuring the larger
+	//number is 100% divisible by the other with no remainder
+	dividend = rand1 * rand2;
+	divisor = rand2;
+
+	//Correct answer
+	correct = dividend / divisor;
+
+	//Display the problem
+	cout << "******Division******" << endl;
+	cout << "*** " << dividend << " / " << divisor << " = ?" << " ***" << endl;
+	cout << "********************" << endl;
+
+	//Get the user's answer
+	getline(cin, userAnswer);
+
+	//Validate the user's answer
+	validateUserAnswer(userAnswer);
+
+	//Convert string to int
+	stringstream geek(userAnswer);
+	geek >> intAnswer;
+
+	//Check if the answer is right or wrong
+	checkUserAnswer(intAnswer, correct);
+
+	//Add a tally to the right or wrong count
+	updateStats(intAnswer, correct, totalmoney, totalcorrect, totalwrong, correctreward, wrongpenalty);
+
+	//call the menu
+	menu();
+
+	//validate the menu choice
+	validateMenu(outputFile, userAnswer, username, totalcorrect, totalwrong, totalmoney, correctreward, wrongpenalty);
+}
+void checkUserAnswer(int intAnswer, int correct)
+//THIS FUNCTION CHECKS IF THE USER'S ANSWER
+//IS THE CORRECT ANSWER
+{
+	//Check if the answer is right or wrong
+	if (intAnswer == correct)
+	{
+		cout << "******CORRECT!******" << endl;
+	}
+	else
+	{
+		cout << "******WRONG!******" << endl;
+	}
+}
+void updateStats(int intAnswer, int correct, double &totalmoney, int &totalcorrect, int &totalwrong, const double correctreward, const double wrongpenalty)
+//THIS FUNCTION UPDATES THE PLAYER'S STATS AT THE END OF EVERY
+//PROBLEM.
+{
+	//what to do if answer is right
+	if (intAnswer == correct)
+	{
+		//add .05 to the current amount of totalmoney
+		totalmoney = (totalmoney + correctreward);
+		//add 1 to the current amount of totalcorrect
+		totalcorrect = (totalcorrect + 1);
+	}
+	//what to do if answer is wrong
+	else if (intAnswer != correct)
+	{
+		//subtract 0.03 from current amount of totalmoney
+		totalmoney = (totalmoney - wrongpenalty);
+		//subtract 1 from current amount of totalwrong
+		totalwrong = (totalwrong + 1);
+	}
+}
+void displayStats(fstream &outputFile, string username, double totalmoney, int totalwrong, int totalcorrect, string userAnswer, const double correctreward, const double wrongpenalty)
+//THIS FUNCTION DISPLAYS THE USER'S CURRENT STATS
+{
+	cout << "************************************" << endl;
+	cout << "************************************" << endl;
+	cout << "*****                          *****" << endl;
+	cout << "*****" << username << "            " << "        *****" << endl;
+	cout << "*****" << "Total earnings: $" << totalmoney << "     *****" << endl;
+	cout << "*****" << "Total correct: " << totalcorrect << "          *****" << endl;
+	cout << "*****" << "Total wrong: " << totalwrong << "            *****" << endl;
+	cout << "*****                          *****" << endl;
+	cout << "************************************" << endl;
+	cout << "************************************" << endl;
+
+	system("PAUSE");
+	//clear screen
+	system("CLS");
+
+	//call the menu function
+	menu();
+
+	//validate the menu choice
+	validateMenu(outputFile, userAnswer, username, totalcorrect, totalwrong, totalmoney, correctreward, wrongpenalty);
+}
+void saveStats(fstream &outputFile, string username, int totalcorrect, int totalwrong, double totalmoney)
+//THIS FUNCTION SAVES THE USERS STATS IN THE OPEN TEXT FILE
+//THEN CLOSES THE FILE
+{
+	//Write the data to the text file and save it
+	outputFile << username << endl;
+	outputFile << totalcorrect << endl;
+	outputFile << totalwrong << endl;
+	outputFile << "$" << totalmoney << endl;
+
+	//Close the file
+	outputFile.close();
+}

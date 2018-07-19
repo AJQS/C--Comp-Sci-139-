@@ -1,0 +1,227 @@
+// Ch6VBprogram.cpp : Defines the entry point for the console application.
+//THIS IS A MODULAR PROGRAM THAT WILL ASK THE USER FOR THEIR NAME AND
+//THEN TO INPUT WHATEVER THEY LIKE. ALL DATA WILL BE WRITTEN TO A TEXT
+//FILE UNTIL THE SENTINEL IS DETECTED. THE PROGRAM WILL THEN READ THE
+//FILE AND DETERMINE HOW MANY EVEN AND ODD DIGITS WERE INPUT, IF ANY
+//AT ALL. THE RESULTS WILL BE DISPLAYED IN THE PROGRAM
+
+#include "stdafx.h"
+#include <cstdlib>
+#include <iostream>
+#include <string>				//For the string variable
+#include <fstream>				//To allow file writing/reading
+
+using namespace std;
+
+//***************IMPORTANT NOTE*********************
+//*   FSTREAM MUST ALWAYS BE PASSED BY REFERENCE   *
+//**************************************************
+
+//PROTOYPES FOR ALL VOID FUNCTIONS BEING USED. VOID FUNCTIONS
+//DO NOT RETURN A VALUE AND ARE DEFINED BY THE PARAMETERS
+//LISTED IN PARENTHESES. IF THERE IS NO "&", IT IS BEING
+//PASSED BY VALLUE, IF THERE IS A "&", IT IS BEING PASSED BY
+//REFERENCE AKA IT IS BEING UPDATED
+void validateUserName(string);
+void createFile(fstream &, string&);
+void writeDataToFile(string &, fstream &);
+void readDataFromFile(fstream &, string &, int &, int &);
+void checkEvenDigit(string &, int &);
+void checkOddDigit(string &, int &);
+void displayResults(int, int);
+
+
+int main()
+{
+	//LOCAL VARIABLE DECLARATIONS THAT WILL BE
+	//CALLED AT SOME POINT EITHER BY THE MAIN
+	//FUNCTION ITSELF OR BY A VOID FUNCTION
+	string username;
+	string whatever;
+	string repeatLoop;
+	fstream outputFile;
+	fstream inputFile;
+	int howManyOdd;
+	int howManyEven;
+
+	//ASK THE USER TO ENTER THEIR NAME AND THEN STORE
+	//THEIR ENTRY IN THE THE STRING username
+	cout << "Please enter your name and press <ENTER>" << endl;
+	getline(cin, username);
+
+	//CALL THE FUNCTION THAT WILL CHECK
+	//IF THE USER MADE A VALID ENTRY.
+	validateUserName(username);
+
+	//TAKE THE NAME THAT THE USER INPUT AND APPEND
+	//IT TO INCLUDE .TXT SO THAT IT WILL CREATE
+	//A TEXT FILE OF THE PROPER FORMAT
+	string filename = (username + ".txt");
+
+	//CALL THE FUNCTION THAT WILL CREATE A FILE
+	//THAT CAN BE WRITTEN TO, NAMED AFTER THE USER
+	createFile(outputFile, filename);
+
+	//CALL THE FUNCTION THAT WILL WRITE ALL DATA
+	//THE USER TYPES INTO A FILE AND THEN CLOSES
+	//THE FILE
+	writeDataToFile(whatever, outputFile);
+
+	//CALL THE FUNCTION THAT WILL OPEN THE FILE AGAIN
+	//AND THEN READ EVERYTHING THE USER TYPED
+	readDataFromFile(inputFile, filename, howManyEven, howManyOdd);
+
+	//DISPLAY THE NUMBER OF ODD AND EVEN NUMBERS
+	//THAT WERE FOUND IN THE TEXT FILE
+	displayResults(howManyEven, howManyOdd);
+
+	//CIAO!!!!
+	cout << "good-bye" << endl;
+
+	system("PAUSE");
+	return EXIT_SUCCESS;
+}
+
+void validateUserName(string username)
+//VALIDATE THE USER INPUT A PROPER NAME THAT ONLY CONTAINS LETTERS
+//OTHERWISE DISPLAY AN ERROR MESSAGE AND ASK THE USER TO TRY AGAIN
+//THIS HAPPENS BY PARSING THE STRING AND LOOKING FOR THE FIRST CHARACTER
+//THAT IS NOT A LETTER AND ALSO MAKING SURE THE USER INPUT SOMETHING
+//DISPLAY AN ERROR MESSAGE IF THE CRITERIA IS NOT MET AND ASK FOR
+//NEW INPUT. USERNAME IS PASSED BY VALUE
+{
+	while (username.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") != -1 || username == "")
+	{
+		cout << "Enter a name with no numbers, spaces, or special characters" << endl;
+		cin.clear();
+		getline(cin, username);
+	}
+}
+void createFile(fstream &outputFile, string &filename)
+//CREATE A TEXT FILE THAT IS NAMED AFTER THE USER
+//IF ONE DOES NOT EXIST ALREADY, OTHERWISE,
+//OPEN IT IN APPEND MODE.
+//DISPLAY AN ERROR MESSAGE OTHERWISE.
+//BOTH PARAMETERS ARE PASSED BY REFERENCE HERE.
+{
+	outputFile.open(filename, ios::out | ios::app);
+	if (outputFile.is_open())
+	{
+	}
+	else cout << "Unable to open file" << endl;
+
+}
+void writeDataToFile(string &whatever, fstream &outputFile)
+//WRITE ALL THE DATA THE USER TYPES INTO THEIR FILE UNTIL
+//THEY TYPE A -1. DO NOT WRITE THE -1 TO THE FILE. CONTINUE
+//TO PROMPT THE USER UNTIL THEY DO SO.
+//CLOSE THE FILE WHEN DONE SO IT SAVES.
+//EVERYTHING IS PASSED BY REFERENCE.
+{
+	const string sentinel = "-1";
+
+	while (whatever != sentinel)
+	{
+		cout << "Enter anything you want and press ENTER" << endl;
+		cout << "To stop entering data, simply type : -1 and press <ENTER>" << endl;
+		getline(cin, whatever);
+
+		if (whatever != sentinel)
+		{
+			outputFile << whatever << endl;
+		}
+		else
+		{
+			outputFile.close();
+		}
+	}
+
+}
+void readDataFromFile(fstream &inputFile, string &filename, int &howManyEven, int &howManyOdd)
+//OPEN THE TEXT FILE THE USER WAS WRITING TO AND COPY THE ENTIRE
+//FILE INTO A STRING CALLED allInput USING A STRING CONSTRUCTOR. THIS CONSTRUCTOR
+//READS ALL THE DATA FROM THE FIRST ITERATOR UNTIL THERE IS NO MORE DATA TO READ.
+//AFTER THAT, TWO MORE FUNCTIONS WILL BE CALLED TO PARSE THE NEWLY BUILT STRING
+//FOR EVEN AND ODD NUMBERS. THE FILE WILL BE CLOSED AFTERWARDS.
+//EVERYTHING IS PASSED BY REFERENCE.
+{
+	string userInput;
+	inputFile.open(filename);
+	ifstream ifs(filename);
+	string allInput((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
+
+	checkEvenDigit(allInput, howManyEven);
+	checkOddDigit(allInput, howManyOdd);
+
+	inputFile.close();
+}
+void checkEvenDigit(string &userInput, int &howManyEven)
+//THIS FUNCTION CREATES A NEW STRING TO STORE EVEN NUMBERS IN.
+//THIS HAPPENS VIA A FOR LOOP THAT USES MODULO TO DETECT IF
+//THE NUMBER IS EVEN. IF THE CHARACTER IN THE INDEX POSITION
+//[counter] IS NOT A DIGIT, NOTHING WILL HAPPEN. AT THE END,
+//THE LENGTH OF THE RESULTING STRING IS MADE INTO AN INTEGER SO A
+//NUMBER VALUE CAN BE DISPLAYED LATER
+//EVERYTHING IS PASSED BY REFERENCE
+{
+	string evenNumbers;
+	int counter = 0;
+	int inputLength = userInput.length();
+
+	for (counter; counter < inputLength; counter++)
+	{
+		if (isdigit(userInput[counter]))
+		{
+			if ((userInput[counter]) % 2 == 0)
+				evenNumbers = evenNumbers + userInput[counter];
+		}
+	}
+	howManyEven = evenNumbers.length();
+}
+void checkOddDigit(string &userInput, int &howManyOdd)
+//THIS FUNCTION CREATES A NEW STRING TO STORE ODD NUMBERS IN.
+//THIS HAPPENS VIA A FOR LOOP THAT USES MODULO TO DETECT IF
+//THE NUMBER IS ODD. IF THE CHARACTER IN THE INDEX POSITION
+//[counter] IS NOT A DIGIT, NOTHING WILL HAPPEN. AT THE END,
+//THE LENGTH OF THE RESULTING STRING IS MADE INTO AN INTEGER SO A
+//NUMBER VALUE CAN BE DISPLAYED LATER
+//EVERYTHING IS PASSED BY REFERENCE
+{
+	string oddNumbers;
+	int counter = 0;
+	int inputLength = userInput.length();
+
+	for (counter; counter < inputLength; counter++)
+	{
+		if (isdigit(userInput[counter]))
+		{
+			if ((userInput[counter]) % 2 == 1)
+				oddNumbers = oddNumbers + userInput[counter];
+		}
+	}
+	howManyOdd = oddNumbers.length();
+}
+void displayResults(int howManyOdd, int howManyEven)
+//THIS FUNCTION DISPLAYS THE RESULTS OF THE MODULUS DIVISION
+//PERFORMED IN THE checkEvenDigit AND checkOddDigit FUNCTIONS.
+//IF THERE WERE NO EVEN OR ODDS, IT DISPLAYS A SEPERATE MESSAGE
+//EVERYTHING IS PASSED BY VALUE HERE BECAUSE NOTHING IS HAPPENING
+//THAT WILL CHANGE THE VALUE OF THE PARAMETERS
+{
+	if (howManyOdd > 0)
+	{
+		cout << "There are " << howManyOdd << " odd numbers" << endl;
+	}
+	else
+	{
+		cout << "There are no odd numbers" << endl;
+	}
+	if (howManyEven > 0)
+	{
+		cout << "There are " << howManyEven << " even numbers" << endl;
+	}
+	else
+	{
+		cout << "There are no even numbers" << endl;
+	}
+}

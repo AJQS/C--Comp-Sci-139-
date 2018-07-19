@@ -1,0 +1,137 @@
+// Ch5Assignment.cpp : Defines the entry point for the console application.
+// This program asks the user for a positive integer and then preforms a number
+// of different operations on that integer
+
+// #include "stdafx.h"
+#include "stdafx.h"
+#include <iostream>
+#include <string>				//For the string variable
+#include <sstream>				//For the conversion of string to int
+#include <fstream>				//To allow writing to file
+#include <algorithm>				//string reverse
+#include <vector>				//Vector for odd&even nums
+
+using namespace std;
+
+int main()
+{
+	ofstream outputFile;
+	outputFile.open("outDataFile.txt");				//Creates a text file to be written to
+
+	string userInput, reversedInput, reverseSpacedInput = "";					//gets input from user
+	int counter = 0;							//initializes the counter to 0
+	int strLength = 0;							//to hold the length of the string entered by user
+	vector<int> evenNums;						//list of even #s
+	vector<int> oddNums;						//list of odd #s
+	string proceed = "y";						//allows loop to run for the 1st time
+
+	while (proceed == "y" || proceed == "Y")
+	{
+		cout << "Please enter a positive integer and press <ENTER>" << endl;
+		getline(cin, userInput);										//Allows the user to input into a string
+		strLength = userInput.length();										//Gets the length of the string
+
+		while (counter < strLength || strLength == 0)						//This nested loop runs as long as the lenghth of the string is greater than counter or 0
+		{
+			int currentDigit = (int)userInput[counter];
+			if (!isdigit(userInput[counter]) && currentDigit >= 0)			//If the user input anything other than a valid positive numeral in that index position, display an error message
+			{
+				cout << "You didn't enter a valid number, try again" << endl;				//Error message to display
+				getline(cin, userInput);								//Allows the user to try inputting into a string again
+				strLength = userInput.length();								//Gets the length of the new string
+				counter = 0;										//Resets the counter to 0 so it starts from the beginning of the new string
+			}
+			else
+			{
+				counter++;										//Increments the counter, allowing the above loop to repeat until every index position has been tested for validity
+			}
+		}//end nested while loop
+
+		cout << "the original number is " << userInput << endl;						//Display the number entered
+		outputFile << "the original number is " << userInput << endl;									//Write the number to the text file
+
+		int i;
+		for (i = 0; i<strLength; i++)             //This loop uses modulo to find evens and odds                   
+		{
+			int digit = userInput[i] - '0';		//Conversion of string to int for mathematics
+			if (digit % 2 == 1)
+			{
+				oddNums.push_back(digit);		//Send any odd numbers to vector<oddNums>
+			}
+			else
+			{
+				evenNums.push_back(digit);		//Send any even numbers to vector<evenNums>
+			}
+		}//end first FOR loop
+
+		reversedInput = userInput;								//Reverse the string
+		reverse(reversedInput.begin(), reversedInput.end());
+
+		for (int j = 0; j<strLength; j++)                                //Loop to add spaces in between each character
+		{
+			if (j != 0) reverseSpacedInput = reverseSpacedInput + " ";
+			reverseSpacedInput = reverseSpacedInput + reversedInput[j];		//Adds spaces in between each character
+		}//end second FOR loop
+
+		cout << "The number reversed is " << reverseSpacedInput << endl;
+		outputFile << "the number reversed is " << reverseSpacedInput << endl;									//Write the reversed number to the text file
+
+																												//CONDITIONAL STATEMENTS
+		if (oddNums.empty())										//If there are no odd numbers
+		{
+			cout << "There are no odd digits" << endl;
+			outputFile << "There are no odd digits" << endl;									//Write to the text file
+		}
+		else {
+			cout << "The odd digits are ";							//If there are odd numbers
+			outputFile << "The odd digits are ";
+			for (unsigned int oddInt = 0; oddInt < oddNums.size(); oddInt++)
+			{
+				if (oddInt != 0) cout << " ";				//Add spaces
+				outputFile << " ";
+				cout << oddNums[oddInt];
+				outputFile << oddNums[oddInt];			//Write to the text file
+			}
+			cout << endl;
+			outputFile << endl;
+		}
+
+
+		if (evenNums.empty())								//If there are no even numbers
+		{
+			cout << "There are no even digits" << endl;
+			outputFile << "There are no even digits" << endl;			//Write to the text file
+			outputFile << "--------------------" << endl;
+		}
+		else {
+			cout << "The even digits are ";					//If there are even numbers
+			outputFile << "The even digits are ";
+			for (unsigned int evenInt = 0; evenInt < evenNums.size(); evenInt++)
+			{
+				if (evenInt != 0) cout << " ";				//Add spaces 
+				outputFile << " ";
+				cout << evenNums[evenInt];
+				outputFile << evenNums[evenInt];				//Write to the text file
+			}
+			outputFile << "\n--------------------" << endl;
+			cout << endl;
+		}
+
+		// reset the vars
+		userInput = reversedInput = reverseSpacedInput = "";
+		counter = strLength = 0;
+		evenNums.clear();
+		oddNums.clear();
+
+		//Continue?
+		cout << "y/Y to continue, any other char to exit" << endl;
+		getline(cin, proceed);
+
+	} //end of first while loop
+
+	  //Close the text file
+	outputFile.close();
+
+
+	return 0;
+} //end of int loop

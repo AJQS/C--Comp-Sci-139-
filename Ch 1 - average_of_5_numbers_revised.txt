@@ -1,0 +1,34 @@
+//This program is used to take a user's input of 5 numbers and find their average
+
+#include "stdafx.h"
+#include <iostream>
+using namespace std;
+
+float main()
+{
+	float number1, number2, number3, number4, number5, average;	
+		//assigns data to each corresponding variable
+
+	cout << "This program will ask you for 5 numbers and find their average\n";
+	cout << "What is the first number?\n";
+	cin >> number1;
+	cout << "What is the second number?\n";
+	cin >> number2;
+	cout << "What is the third number?\n";
+	cin >> number3;
+	cout << "What is the fourth number?\n";
+	cin >> number4;
+	cout << "What is the fifth number?\n";
+	cin >> number5;
+
+	average = (number1 + number2 + number3 + number4 + number5) / 5; 	
+		//calculates the average of the five numbers
+
+	cout << "The average of the five numbers is " << average << ".\n";
+
+	system("pause");		//stops the program from auto exiting
+	return 0;
+}
+
+
+	

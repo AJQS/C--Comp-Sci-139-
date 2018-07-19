@@ -1,0 +1,55 @@
+// SmudaAustinCh3Quiz.cpp : Defines the entry point for the console application.
+
+// This program generates two random numbers between 1 and 10
+// It also shows the sum, difference, product, and quotient of the two numbers
+// Displayed to two decimal places
+
+#include "stdafx.h"
+#include <iostream>		//For input and output
+#include <iomanip>		//For setprecision and fixed
+#include <cstdlib>		//For rand and srand functions
+#include <ctime>		//For time function
+using namespace std;
+
+int main()
+{
+	//Constants
+	const int MIN_VALUE = 1;	//Minimum value for random
+	const int MAX_VALUE = 10;	//Maximum value for random
+
+	//Variables
+	int rand1;			//Value for random #1
+	int rand2;			//Value for random #2
+
+	//Get the system time
+	unsigned seed = time(0);
+
+	//Seed the random number generator
+	srand(seed);
+
+	//Generates the two numbers and displays them
+	cout << "The two random numbers are ";
+	rand1 = (rand() % (MAX_VALUE - MIN_VALUE + 1)) + MIN_VALUE;
+	rand2 = (rand() % (MAX_VALUE - MIN_VALUE + 1)) + MIN_VALUE;
+	cout << rand1 << " and " << rand2 << endl;
+
+	//Sets the precision to 4 and shows decimals, even for whole numbers
+	cout << setprecision(2) << fixed;
+
+	//Displays the sum of the two numbers	
+	cout << "The sum of " << rand1 << " and " << rand2 << " is: " << static_cast<float>(rand1) + static_cast<float>(rand2) << endl;
+
+	//Displays the difference of the two numbers
+	cout << "The difference of " << rand1 << " and " << rand2 << " is: " << static_cast<float>(rand1) - static_cast<float>(rand2) << endl;
+
+	//Displays the product of the two numbers
+	cout << "The product of " << rand1 << " and " << rand2 << " is: " << static_cast<float>(rand1) * static_cast<float>(rand2) << endl;
+
+	//Displays the quotient of the two numbers
+	cout << "The quotient of " << rand1 << " and " << rand2 << " is: " << static_cast<float>(rand1) / static_cast<float>(rand2) << endl;
+
+	system("pause");
+
+    return 0;
+}
+

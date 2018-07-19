@@ -1,0 +1,239 @@
+// Ch9attempt1.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+
+#include <iostream>
+#include <iomanip>
+#include <string>
+
+
+using namespace std;
+
+int main()
+{
+	//Definition and initialization of variables and pointers
+	char aChar;
+	char *ptr1 = nullptr;
+	char *ptr2 = nullptr;	
+	char *ptr3 = nullptr;	//ptr3 holds the final results of user input
+	int counter = 0;
+	string proceed = "y";
+
+
+	while (proceed == "y")
+	{
+		//Ask the user to enter anything they want
+		cout << "Enter a string: " << endl;
+		cin.clear();
+		aChar = cin.get();
+
+		while (aChar != 10)
+		{
+			//Increment counter
+			counter++;
+			
+			//For first iteration only
+			if (ptr1 == nullptr && counter == 1)
+			{
+				//Dynamically allocate array
+				ptr1 = new char[counter];
+				//Add character to the array
+				ptr1[counter - 1] = aChar;
+			}
+			
+			//Conditional statement to juggle the pointers
+			else if (ptr2 == nullptr && counter != 1)
+			{
+				//Dynamically allocate 2nd array
+				ptr2 = new char[counter];
+					//Copy pointer contents
+					for (int i = 0; i < counter; i++)
+					{
+						ptr2[i] = ptr1[i];
+					}
+				//Append current char to ptr2
+				ptr2[counter - 1] = aChar;
+				//Delete ptr1
+				delete[] ptr1;
+				//set to null
+				ptr1 = nullptr;
+			}
+			
+			//Conditional statement to juggle the pointers
+			else if (ptr2 != nullptr && counter != 1)
+			{
+				//Dynamically allocate 1st array again
+				ptr1 = new char[counter];
+					//Copy pointer contents
+					for (int i = 0; i < counter; i++)
+					{
+						ptr1[i] = ptr2[i];
+					}
+				//Append current char to ptr1
+				ptr1[counter - 1] = aChar;
+				//Delete ptr2
+				delete[] ptr2;
+				//set to null
+				ptr2 = nullptr;
+			}
+			
+			//Get next char from input stream
+			aChar = cin.get();
+		}	
+
+//-------------THIS BLOCK SETS PTR3------------------------
+//---------------------------------------------------------		
+		//Final value of pointer if ptr2 is null
+		if (ptr2 == nullptr)
+		{
+			//Assign the contents of ptr1 to ptr3
+			ptr3 = new char[counter];
+			for (int i = 0; i < counter; i++)
+			{
+				ptr3[i] = ptr1[i];
+			}
+			//Display the array
+			cout << "ptr3 holds: ";
+			for (int i = 0; i < counter; i++)
+			{
+				cout << ptr3[i];
+			}
+		}
+		//Final value of pointer if ptr1 is null
+		else if (ptr1 == nullptr)
+		{
+			//Assign the contents of ptr2 to ptr3
+			ptr3 = new char[counter];
+			for (int i = 0; i < counter; i++)
+			{
+				ptr3[i] = ptr2[i];
+			}
+			//Display the array
+			cout << "ptr3 holds: ";
+			for (int i = 0; i < counter; i++)
+			{
+				cout << ptr3[i];
+			}
+			
+		}
+		cout << endl;
+//-------------THIS BLOCK SETS PTR3------------------------
+//---------------------------------------------------------	
+
+		//Arrays to hold count of vowels from user input
+		char upperVowels[5] = { 'A','E','I','O','U' };
+		char lowerVowels[5] = { 'a','e','i','o','u' };
+		//Set array contents to 0
+		int upperCaseCount[5] = { 0 };
+		int lowerCaseCount[5] = { 0 };
+		//Reset int counters
+		int lowercase = 0;
+		int uppercase = 0;
+
+		//For loop to count  UPPERCASE vowels
+		for (int n = 0; n != 10; n++)
+		{
+			if (ptr3[n] == 'A')
+				//+1 to proper index position in array 
+				upperCaseCount[0] += 1;
+				uppercase++;
+			if (ptr3[n] == 'E')
+				//+1 to proper index position in array 
+				upperCaseCount[1] += 1;
+				uppercase++;
+			if (ptr3[n] == 'I')
+				//+1 to proper index position in array 
+				upperCaseCount[2] += 1;
+				uppercase++;
+			if (ptr3[n] == 'O')
+				//+1 to proper index position in array 
+				upperCaseCount[3] += 1;
+				uppercase++;
+			if (ptr3[n] == 'U')
+				//+1 to proper index position in array 
+				upperCaseCount[4] += 1;
+				uppercase++;
+		}
+		//For loop to count lowercase vowels
+		for (int n = 0; n != 10; n++)
+		{
+			if (ptr3[n] == 'a')
+				//+1 to proper index position in array
+				lowerCaseCount[0] += 1;
+				lowercase++;
+			if (ptr3[n] == 'e')
+				//+1 to proper index position in array
+				lowerCaseCount[1] += 1;
+				lowercase++;
+			if (ptr3[n] == 'i')
+				//+1 to proper index position in array
+				lowerCaseCount[2] += 1;
+				lowercase++;
+			if (ptr3[n] == 'o')
+				//+1 to proper index position in array
+				lowerCaseCount[3] += 1;
+				lowercase++;
+			if (ptr3[n] == 'u')
+				//+1 to proper index position in array
+				lowerCaseCount[4] += 1;
+				lowercase++;
+		}
+
+		cout << endl;
+		cout << endl;
+
+		//If statements to display lower case vowels present
+		if (lowercase > 0)
+		{
+			cout << "The lower-case vowels which are present are: ";
+			for (int i = 0; i < 5; i++)
+			{
+				if (lowerCaseCount[i] > 0)
+					cout << lowerVowels[i] << "(" << lowerCaseCount[i] << ") ";
+			}
+			cout << endl;
+		}
+		//What to display if there are no lower case vowels
+		else if (lowercase = 0)
+		{
+			cout << "There are no lower-case vowels" << endl;
+		}
+		//If statement to display upper case vowels present
+		if (uppercase > 0)
+		{
+			cout << "The upper-case vowels which are present are: ";
+			for (int i = 0; i < 5; i++)
+			{
+				if (upperCaseCount[i] > 0)
+					cout << upperVowels[i] << "(" << upperCaseCount[i] << ") ";
+			}
+			cout << endl;
+		}
+		//What to display if there are no upper case vowels
+		else if (uppercase = 0)
+		{
+			cout << "There are no upper-case vowels" << endl;
+		}
+		
+
+		//REPEAT PROGRAM SEQUENCE
+		cout << endl;
+		cout << "Would you like to continue? 'y' to continue or anything else to exit" << endl;
+		cin.clear();
+		getline(cin, proceed);
+
+		//Set all pointers to nullptr
+		delete[] ptr1;
+		ptr1 = nullptr;
+		delete[] ptr2;
+		ptr2 = nullptr;
+		delete[] ptr3;
+		ptr3 = nullptr;
+		//Reset counter
+		counter = 0;
+	} 
+
+    return 0;
+}
+

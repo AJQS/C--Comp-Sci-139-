@@ -1,0 +1,152 @@
+// CHAPTER7QUIZASSIGNMENT.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <sstream>
+
+using namespace std;
+
+// Constant for the array size.
+const int EMPLOYEE_SIZE = 7;
+
+// Function Prototypes
+void getEmployeeInfo(int empId[], int hours[], double payRate[], double wages[], int EMPLOYEE_SIZE);
+void displayWages(int empId[], double wages[], int EMPLOYEE_SIZE);
+void validateHoursWorked(string& str1, int& userNumber, int hours[], int i);
+void validatePayRate(string& str1, double& userNumber);
+
+int main()
+{
+
+	// declare Array of employee ID numbers
+	int empId[EMPLOYEE_SIZE] = { 1, 2, 3, 4, 5, 6, 7 };
+
+	// declare Array to hold the hours worked for each employee
+	int hours[EMPLOYEE_SIZE];
+
+	// declare Array to hold the hourly pay rate for each employee
+	double payRate[EMPLOYEE_SIZE];
+
+	// declare Array to hold the gross wages for each employee
+	double wages[EMPLOYEE_SIZE];
+
+	// Get the employee payroll information and store it in the arrays.
+	// call the function getEmployeeInfo
+	cout << "Enter the requested information for each employee." << endl;
+
+	getEmployeeInfo(empId, hours, payRate, wages, EMPLOYEE_SIZE);
+
+	//Calculate each employees wages
+	for (int i = 0; i < EMPLOYEE_SIZE; i++)
+	{
+		wages[i] = hours[i] * payRate[i];
+	}
+
+	// Display the payroll information.
+	// call the function displayWages
+	displayWages(empId, wages, EMPLOYEE_SIZE);
+	
+	system("pause");
+	return 0;
+}
+
+//function defitions
+
+// ********************************************************
+// The getEmployeeInfo function receives four parallel    *
+// arrays as arguments. The 1st array contains employee   *
+// IDs to be displayed in prompts. It asks for input and  *
+// stores hours worked and pay rate information in the    *
+// 2nd and 3rd arrays. This information is used to        *
+// calculate gross pay, which it stores in the 4th array. *
+// ********************************************************
+void getEmployeeInfo(int empId[], int hours[], double payRate[], double wages[], int EMPLOYEE_SIZE)
+{
+	int userNumber;
+	string str1;
+
+	//Loop counter
+	int i;
+
+	//Get info for each employee
+	for (i = 0; i <= EMPLOYEE_SIZE - 1; i++)
+	{
+		cout << "Employee # " << empId[i] << endl;
+		cout << "\tHours worked: ";
+		cin >> hours[i];
+
+		//call hour validation function
+		validateHoursWorked(str1, userNumber, hours, i);
+
+		cout << "\tPay rate: $";
+		cin >> payRate[i];
+
+		//Input validation loop for if the user enters a payRate
+		//that is outside the valid range of 5 and 15
+		if (payRate[i] < 5.00 || payRate[i] > 15.00)
+		{
+			do
+			{
+				cout << "Please enter a pay rate between 5.00 and 15.00" << endl;
+				cin >> payRate[i];
+			} while (payRate[i] < 1 || payRate[i] > 40);
+		}
+	}
+}
+
+// ********************************************************
+// The displayWages function receives 2 parallel arrays.  *
+// The first holds employee IDs and the second holds      *
+// employee gross pay. The function displays this         *
+// information for each employee.                         *
+// ********************************************************
+void displayWages(int empId[], double wages[], int EMPLOYEE_SIZE)
+{
+	cout << fixed << showpoint << setprecision(2);
+	cout << "-----------------------" << endl;
+	cout << "Employee          Wages" << endl;
+	cout << "-----------------------" << endl;
+
+	for (int i = 0; i < EMPLOYEE_SIZE; i++)
+	{
+		cout << endl;
+		cout << "Employee # " << empId[i] << "   $ " << wages[i];
+		cout << endl;
+	}
+	
+
+}
+
+// ********************************************************
+//The validateHoursWorked fuction receives a string and   *
+//returns an integer.  The hours worked must be greater   *
+//than 0 but less than or equal to 40                     *
+// ********************************************************
+//=================================================
+void validateHoursWorked(string& str1, int& userNumber, int hours[], int i)
+{
+	//Input validation loop for if the user enters a number of
+	//hours that is outside the valid range of 1 & 40
+	if (hours[i] < 1 || hours[i] > 40)
+	{
+		do
+		{
+			cout << "Please enter an integer between 1 & 40." << endl;
+			cin >> hours[i];
+		} while (hours[i] < 1 || hours[i] > 40);
+	}
+}
+
+// ********************************************************
+//The validatePayRate fuction receives a string and   	  *
+//returns a double.  The pay rate must be greater   	  *
+//than or equal to 5 but less than or equal to 15                     *
+// ********************************************************
+void validatePayRate(string& str1, double& userNumber)
+{
+	//hint: just as there is an stoi, theres is an stof (string to float) and an stod (string to double)
+
+}
+
